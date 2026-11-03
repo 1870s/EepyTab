@@ -1,0 +1,336 @@
+# ╭──────────────────────────────────────────────────────────────────────────╮
+# │                               E e p y T a b                              │
+# │                 modern player list for mc.eepy.at · eepy.at              │
+# ╰──────────────────────────────────────────────────────────────────────────╯
+#
+# All texts use MiniMessage: https://docs.advntr.dev/minimessage/format.html
+# Live editor to try formats: https://webui.advntr.dev/
+#
+# Apply changes with /eepytab reload. If the file contains a syntax error the
+# reload is rejected and the previous configuration stays active.
+#
+# ── EepyTab text tags ─────────────────────────────────────────────────────────
+#   Palette colours   <primary> <secondary> <highlight> <text> <muted> <subtle>
+#                     <line> <good> <warn> <bad>        (defined under "palette")
+#   Effects           <flow:c1:c2:...>text</flow>    slowly moving gradient
+#                     <pulse:c1:c2>text</pulse>      soft colour breathing
+#                     <anim:name>                    rotating text (see "animations")
+#                     <separator>                    the divider defined below
+#   Server            <online> <max> <load_percent> <load_bar> <tps> <tps_color>
+#                     <mspt> <staff_online> <time> <date> <greeting>
+#   Player            <player> <displayname> <ping> <ping_color> <world>
+#                     <world_alias> <mode> <rank> <rank_prefix>
+#   Branding          <server_name> <ip> <website> <discord>
+#   PlaceholderAPI    any %placeholder% (only when PlaceholderAPI is installed)
+#
+# <flow> and <pulse> accept palette names (primary, secondary, ...) or hex colours.
+# For a seamless <flow> loop, start and end with the same colour.
+
+config-version: 1
+
+# ── Branding ──────────────────────────────────────────────────────────────────
+branding:
+  server-name: "eepy"
+  ip: "mc.eepy.at"
+  website: "eepy.at"
+  discord: "dsc.gg/muezza"
+  # Shown by <mode>. Can be overridden per world under "worlds".
+  mode: "Survival"
+
+# ── Palette ───────────────────────────────────────────────────────────────────
+# Every entry becomes a colour tag, e.g. <primary>text</primary>.
+palette:
+  primary: "#B98CFF"     # soft violet
+  secondary: "#8DB6FF"   # soft blue
+  highlight: "#F3EEFF"   # near white with a lavender tint
+  text: "#DCD3F5"        # body text
+  muted: "#9C93BD"       # labels
+  subtle: "#6F6890"      # secondary info
+  line: "#4B4566"        # dividers and dots
+  good: "#8EE8C0"        # mint
+  warn: "#FFD48A"        # warm sand
+  bad: "#FF8FA3"         # soft rose
+
+# Used by the <separator> tag. Struck-through spaces draw a clean line that
+# fades out towards both ends. It uses 12 colour bands instead of a per-letter
+# <gradient> on purpose: it looks the same but keeps the tab list packet small,
+# which matters because the header is resent while <flow> animates.
+separator: "<st><#382F57>     <#544484>     <#6F58B2>     <#8070D2>     <#858CE4>     <#8AA8F6>     <#8AA8F6>     <#858CE4>     <#8070D2>     <#6F58B2>     <#544484>     <#382F57>     </st>"
+
+# ── Layouts ───────────────────────────────────────────────────────────────────
+# A layout is one header + footer design. Each list entry is one line;
+# Minecraft centres every line automatically. Use "" for an empty line.
+layouts:
+  default:
+    header:
+      - ""
+      - "<flow:#C9A6FF:#8DB6FF:#F3EEFF:#8DB6FF:#C9A6FF><bold>✦   e e p y   ✦</bold></flow>"
+      - "<subtle>cozy minecraft · <ip></subtle>"
+      - ""
+      - "<separator>"
+      - ""
+      - "<anim:welcome>"
+      - ""
+      - "<muted>ONLINE</muted> <highlight><online></highlight><subtle>/<max></subtle>    <line>•</line>    <muted>PING</muted> <ping_color><ping>ms</ping_color>    <line>•</line>    <muted>TPS</muted> <tps_color><tps></tps_color>"
+      - ""
+    footer:
+      - ""
+      - "<separator>"
+      - ""
+      - "<muted>WEBSITE</muted>  <line>›</line>  <secondary><bold><website></bold></secondary>"
+      - "<muted>DISCORD</muted>  <line>›</line>  <primary><bold><discord></bold></primary>"
+      - ""
+      - "<anim:footer>"
+      - "<subtle><world_alias>  <line>·</line>  <mode>  <line>·</line>  <time></subtle>"
+      - ""
+
+  # Same design plus a compact technical line for the team.
+  staff:
+    header:
+      - ""
+      - "<flow:#C9A6FF:#8DB6FF:#F3EEFF:#8DB6FF:#C9A6FF><bold>✦   e e p y   ✦</bold></flow>"
+      - "<subtle>cozy minecraft · <ip></subtle>"
+      - ""
+      - "<separator>"
+      - ""
+      - "<anim:welcome>"
+      - ""
+      - "<muted>ONLINE</muted> <highlight><online></highlight><subtle>/<max></subtle>    <line>•</line>    <muted>PING</muted> <ping_color><ping>ms</ping_color>    <line>•</line>    <muted>TPS</muted> <tps_color><tps></tps_color>"
+      - "<subtle>LOAD</subtle> <load_bar> <subtle><load_percent>%    <line>•</line>    MSPT <mspt>    <line>•</line>    STAFF <staff_online></subtle>"
+      - ""
+    footer:
+      - ""
+      - "<separator>"
+      - ""
+      - "<muted>WEBSITE</muted>  <line>›</line>  <secondary><bold><website></bold></secondary>"
+      - "<muted>DISCORD</muted>  <line>›</line>  <primary><bold><discord></bold></primary>"
+      - ""
+      - "<anim:footer>"
+      - "<subtle><world_alias>  <line>·</line>  <mode>  <line>·</line>  <time></subtle>"
+      - ""
+
+# Layout used when no rule below matches.
+default-layout: default
+
+# Rules are checked top to bottom; the first matching rule picks the layout.
+# Every condition is optional, and all given conditions must match:
+#   permission:  the player needs this permission
+#   worlds:      the player is in one of these worlds
+#   ranks:       the player has one of these rank ids (see "ranks")
+#   min-online / max-online:  number of players online (as seen by the viewer)
+layout-rules:
+  - layout: staff
+    permission: "eepytab.layout.staff"
+  # - layout: nether
+  #   worlds: ["world_nether"]
+  # - layout: busy
+  #   min-online: 50
+
+# ── Animations ────────────────────────────────────────────────────────────────
+animations:
+  # false = everything static: <flow>/<pulse> render as plain gradients and
+  # every <anim:...> shows its first frame.
+  enabled: true
+  # Seconds for one full loop of <flow>. Higher = calmer.
+  gradient-cycle-seconds: 8.0
+  # Seconds for one full in-and-out of <pulse>.
+  pulse-cycle-seconds: 4.0
+  # Rotating texts used via <anim:name>. "interval" is in seconds.
+  texts:
+    welcome:
+      interval: 6.0
+      frames:
+        - "<text><greeting>, <highlight><player></highlight>. Welcome to <primary>eepy</primary>!</text>"
+        - "<text>Welcome to our Minecraft server!</text>"
+        - "<text>Grab a blanket and make yourself <secondary>cozy</secondary>.</text>"
+    footer:
+      interval: 8.0
+      frames:
+        - "<text>Play at <highlight><ip></highlight></text>"
+        - "<text>News, events & support on <primary><discord></primary></text>"
+        - "<text>Invite your friends to <highlight><ip></highlight> <primary>☾</primary></text>"
+
+# ── Player list entries ───────────────────────────────────────────────────────
+player-list:
+  # false = EepyTab leaves player names and sorting to other plugins.
+  enabled: true
+  # Tags: <rank_prefix> <rank_suffix> <name_color>...</name_color> <player>
+  #       <rank> <vanish_marker>, plus palette, branding and PlaceholderAPI.
+  # Effects are rendered statically here (no animation) to save packets.
+  format: "<rank_prefix><name_color><player></name_color><rank_suffix><vanish_marker>"
+  # NAME = plain account name (recommended, avoids double prefixes from chat
+  # plugins). DISPLAY_NAME = the display name other plugins may have set.
+  name-source: NAME
+  # Sort the list by rank priority (highest first). Equal ranks are sorted
+  # alphabetically by the client. Uses the native list order, no teams.
+  sort-by-rank: true
+
+# ── Ranks ─────────────────────────────────────────────────────────────────────
+# With LuckPerms: a player's rank is the configured rank matching their primary
+# group, or else their heaviest inherited group that matches a rank.
+# Without LuckPerms: the highest-priority rank whose permission the player has
+# (default "eepytab.rank.<id>"; these permissions are never given by default).
+ranks:
+  # Rank for players that match nothing else.
+  default-rank: member
+  # Where prefixes and suffixes come from:
+  #   CONFIG    = always the prefixes below
+  #   LUCKPERMS = always the LuckPerms prefix/suffix (colours from below are kept)
+  #   AUTO      = the prefixes below; LuckPerms prefix for groups not listed here
+  prefix-source: AUTO
+  # true = sort by LuckPerms group weight instead of the priorities below.
+  use-luckperms-weight: false
+  list:
+    owner:
+      display-name: "Owner"
+      priority: 100
+      prefix: "<gradient:#C9A6FF:#8DB6FF><bold>OWNER</bold></gradient> <line>│</line> "
+      name-color: "#F3EEFF"
+      staff: true
+      luckperms-groups: ["owner"]
+    admin:
+      display-name: "Admin"
+      priority: 90
+      prefix: "<#FF8FA3><bold>ADMIN</bold></#FF8FA3> <line>│</line> "
+      name-color: "#FFE3E9"
+      staff: true
+      luckperms-groups: ["admin"]
+    developer:
+      display-name: "Developer"
+      priority: 80
+      prefix: "<#7FD3FF><bold>DEV</bold></#7FD3FF> <line>│</line> "
+      name-color: "#E2F4FF"
+      staff: true
+      luckperms-groups: ["developer", "dev"]
+    moderator:
+      display-name: "Moderator"
+      priority: 70
+      prefix: "<#8EE8C0><bold>MOD</bold></#8EE8C0> <line>│</line> "
+      name-color: "#E3FBF1"
+      staff: true
+      luckperms-groups: ["moderator", "mod"]
+    vip:
+      display-name: "VIP"
+      priority: 20
+      prefix: "<#FFD48A><bold>VIP</bold></#FFD48A> <line>│</line> "
+      name-color: "#FFF4DF"
+      luckperms-groups: ["vip"]
+    member:
+      display-name: "Member"
+      priority: 0
+      prefix: ""
+      name-color: "#CFC6EA"
+      luckperms-groups: ["default", "member"]
+
+# ── Dynamic placeholders ──────────────────────────────────────────────────────
+placeholders:
+  # Used by <time>, <date> and <greeting>. Any Java zone id, e.g. "Europe/Berlin".
+  timezone: "Europe/Vienna"
+  time-format: "HH:mm"
+  date-format: "dd.MM.yyyy"
+  greetings:
+    morning: "Good morning"      # 05:00 – 11:59
+    afternoon: "Good afternoon"  # 12:00 – 17:59
+    evening: "Good evening"      # 18:00 – 21:59
+    night: "Good night"          # 22:00 – 04:59
+  # <ping_color>: good up to "good" ms, warn up to "medium" ms, bad above.
+  ping:
+    good: 80
+    medium: 160
+  # <tps_color>: good from "good", warn from "medium", bad below.
+  tps:
+    good: 19.0
+    medium: 16.0
+  load-bar:
+    length: 12
+    symbol: "|"
+  # Shown when a value is not available (e.g. ping before the first keep-alive).
+  unavailable: "–"
+
+# ── Update intervals (in ticks, 20 ticks = 1 second) ──────────────────────────
+update-intervals:
+  # Header and footer. 5 keeps <flow> smooth; use 20+ when animations are off.
+  header-footer: 5
+  # Player names, ranks and sorting. LuckPerms changes apply instantly anyway.
+  player-list: 40
+  # Online count, TPS, MSPT and vanish detection.
+  server-stats: 20
+
+performance:
+  # Only send a header/footer or name packet when the content changed.
+  skip-unchanged: true
+  # Spread player updates evenly over the interval instead of updating
+  # everyone in the same tick.
+  spread-updates: true
+
+# ── Vanish ────────────────────────────────────────────────────────────────────
+# Works with vanish plugins that set the common "vanished" metadata
+# (SuperVanish, PremiumVanish, EssentialsX, CMI, ...).
+vanish:
+  # Vanished players are not counted for viewers who cannot see them.
+  hide-from-counts: true
+  # Added to a vanished player's name. Only viewers who can see the vanished
+  # player (usually staff) ever see this entry.
+  list-marker: " <subtle>(vanished)</subtle>"
+
+# ── Worlds ────────────────────────────────────────────────────────────────────
+# alias   = name shown by <world_alias> (defaults to the world folder name)
+# mode    = overrides branding.mode for <mode>
+# enabled = false clears the header/footer in this world and leaves it to
+#           other plugins (player names keep working).
+worlds:
+  world:
+    alias: "Overworld"
+  world_nether:
+    alias: "Nether"
+  world_the_end:
+    alias: "The End"
+
+# ── Maintenance ───────────────────────────────────────────────────────────────
+# Toggle with /eepytab maintenance on|off (persisted in data.yml).
+maintenance:
+  # HEADER_BOTTOM or FOOTER_TOP
+  position: HEADER_BOTTOM
+  lines:
+    - "<pulse:warn:#FFB86B><bold>MAINTENANCE</bold></pulse> <subtle>· some features may be unavailable</subtle>"
+    - ""
+
+# ── Integrations ──────────────────────────────────────────────────────────────
+# Both are optional. EepyTab works without them.
+integrations:
+  luckperms:
+    enabled: true
+  placeholderapi:
+    enabled: true
+    # How placeholder results are read: LEGACY (§/& colour codes), MINIMESSAGE, PLAIN
+    output-format: LEGACY
+    # Replaces %placeholders% when PlaceholderAPI is missing or returns nothing.
+    missing-value: ""
+    # Provides %eepytab_rank%, %eepytab_rank_id%, %eepytab_rank_prefix%,
+    # %eepytab_layout%, %eepytab_world_alias%, %eepytab_mode%, %eepytab_maintenance%
+    register-expansion: true
+
+compatibility:
+  # Warn at startup when another plugin that manages the tab list is installed.
+  warn-about-other-tab-plugins: true
+  # Reset header, footer, names and order when EepyTab is disabled.
+  restore-on-disable: true
+
+# ── Admin preview ─────────────────────────────────────────────────────────────
+# /eepytab preview <layout> shows that layout to you for this many seconds.
+preview-duration-seconds: 30
+
+# ── Messages ──────────────────────────────────────────────────────────────────
+messages:
+  prefix: "<gradient:#C9A6FF:#8DB6FF><bold>eepy</bold></gradient> <line>»</line> "
+  no-permission: "<bad>You don't have permission to do that.</bad>"
+  player-only: "<bad>This command can only be used in game.</bad>"
+  reload-success: "<good>Configuration reloaded</good> <subtle>in <ms>ms.</subtle>"
+  reload-warnings: "<warn><count> warning(s) while loading. See the console for details.</warn>"
+  reload-failed: "<bad>Reload failed:</bad> <text><error></text> <subtle>The previous configuration stays active.</subtle>"
+  preview-refreshed: "<text>Your tab list was refreshed. Current layout: <primary><layout></primary></text>"
+  preview-layout: "<text>Showing layout <primary><layout></primary> for <highlight><seconds>s</highlight>.</text>"
+  unknown-layout: "<bad>Unknown layout</bad> <text><layout></text><subtle>. Available: <layouts></subtle>"
+  maintenance-enabled: "<warn>Maintenance display enabled.</warn>"
+  maintenance-disabled: "<good>Maintenance display disabled.</good>"
+  maintenance-status: "<text>Maintenance display is <primary><state></primary>.</text>"

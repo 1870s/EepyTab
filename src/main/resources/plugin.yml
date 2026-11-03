@@ -1,0 +1,36 @@
+name: EepyTab
+version: '${version}'
+main: at.eepy.tab.EepyTabPlugin
+api-version: '${apiVersion}'
+description: Modern, animated player list (tab) design for eepy - mc.eepy.at
+author: eepy
+website: https://eepy.at
+softdepend:
+  - LuckPerms
+  - PlaceholderAPI
+
+# Commands are registered with Paper's Brigadier API, see EepyTabCommand.
+permissions:
+  eepytab.admin:
+    description: Full access to all EepyTab commands.
+    default: op
+    children:
+      eepytab.reload: true
+      eepytab.preview: true
+      eepytab.debug: true
+      eepytab.maintenance: true
+  eepytab.reload:
+    description: Reload the EepyTab configuration.
+    default: op
+  eepytab.preview:
+    description: Refresh your own tab list and preview layouts.
+    default: op
+  eepytab.debug:
+    description: Show technical information about EepyTab.
+    default: op
+  eepytab.maintenance:
+    description: Toggle the maintenance display.
+    default: op
+  eepytab.layout.staff:
+    description: See the staff layout (used by the default layout rules).
+    default: op

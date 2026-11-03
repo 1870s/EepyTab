@@ -1,0 +1,20 @@
+# Gradle
+.gradle/
+build/
+
+# IDEs
+.idea/
+*.iml
+out/
+.vscode/
+.settings/
+.classpath
+.project
+bin/
+
+# Local test server
+run/
+
+# OS
+.DS_Store
+Thumbs.db
